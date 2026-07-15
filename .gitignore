@@ -1,0 +1,23 @@
+# Secrets
+.env
+
+# Data files (large binaries — not for version control)
+data/*.parquet
+data/*.csv
+data/*.xml
+data/*.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# macOS
+.DS_Store

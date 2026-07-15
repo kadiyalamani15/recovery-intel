@@ -17,6 +17,7 @@ Usage:
 import argparse
 import json
 import os
+import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
@@ -294,10 +295,16 @@ def run_comparison_eval(cases: list[dict]) -> dict:
     case_results = []
 
     for i, case in enumerate(cases, 1):
+        if i > 1:
+            # Give the 6K TPM budget a moment to recover between cases
+            time.sleep(30)
         print(f"\n[{i}/{len(cases)}] {case['date']} — {case['category']}")
         row = {**case, "generic": {}, "personalized": {}}
 
-        for variant in ("generic", "personalized"):
+        for j, variant in enumerate(("generic", "personalized")):
+            if j > 0:
+                # Let default-model budget recover between variants within the same case
+                time.sleep(12)
             print(f"  Running {variant}...", end=" ", flush=True)
             try:
                 result = run_pipeline(
@@ -436,9 +443,10 @@ def main():
     load_dotenv()
 
     ap = argparse.ArgumentParser()
-    ap.add_argument("--run", action="store_true", help="Run personalized-only eval (20 cases)")
-    ap.add_argument("--compare", action="store_true", help="Run generic vs personalized comparison (40 LLM calls)")
+    ap.add_argument("--run", action="store_true", help="Run personalized-only eval")
+    ap.add_argument("--compare", action="store_true", help="Run generic vs personalized comparison")
     ap.add_argument("--summary", action="store_true", help="Print stored results")
+    ap.add_argument("--n", type=int, default=None, help="Limit to first N cases (default: all 20)")
     args = ap.parse_args()
 
     if args.summary:
@@ -455,6 +463,9 @@ def main():
     if args.compare:
         signals = _load_signals()
         cases = select_test_cases(signals)
+        if args.n:
+            cases = cases[:args.n]
+            print(f"  (limiting to first {args.n} cases)")
         comparison = run_comparison_eval(cases)
         print_comparison(comparison)
         return
@@ -462,6 +473,9 @@ def main():
     if args.run:
         signals = _load_signals()
         cases = select_test_cases(signals)
+        if args.n:
+            cases = cases[:args.n]
+            print(f"  (limiting to first {args.n} cases)")
         results = run_eval(cases)
         save_results(results)
         print_summary(results)

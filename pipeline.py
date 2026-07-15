@@ -310,8 +310,8 @@ def score_recovery(state: RecoveryState) -> RecoveryState:
 
 # Groq model mapping (fast + capable)
 _GROQ_MODELS = {
-    "default": "llama-3.3-70b-versatile",   # insights + coaching (6K TPM)
-    "judge": "llama-3.1-8b-instant",         # eval judge (30K TPM — avoids rate limit)
+    "default": "llama-3.1-8b-instant",   # insights + coaching (30K TPM free tier)
+    "judge": "llama-3.1-8b-instant",     # eval judge (30K TPM)
     "fast": "llama-3.1-8b-instant",
 }
 
